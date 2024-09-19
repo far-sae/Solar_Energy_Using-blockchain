@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Energy Trading - Login</title>
+    <style>
+        /* Basic styles for the page */
+        body {
+            background-image: url('/Users/farazsaeed/solarenergy /public/background.jpg'); /* Local background image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #090808;
+        }
+
+
+        /* Container for the login and OTP section */
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin-bottom: 40px; /* Space between login/OTP and transfer buttons */
+        }
+
+        /* Input field styles */
+        input[type="text"], input[type="password"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Style for the buttons */
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #ffffff;
+            color: blue;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #090909;
+        }
+
+        /* Center the icons and the text */
+        .icon, .otp-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        /* Wrapper for transfer buttons */
+        .transfer-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 400px;
+        }
+
+        /* Transfer button containers */
+        .transfer-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 180px;
+        }
+         label {
+            font-size: 18px; /* Make both username and password label the same size */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login and OTP section -->
+    <div class="container">
+        <div class="icon">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter username" />
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter password" />
+        </div>
+        <button onclick="loginUser()">Login</button>
+        <button onclick="generateOTP()">Generate OTP</button>
+
+        <h2>Verify OTP</h2>
+        <div>
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" placeholder="Enter OTP" />
+        </div>
+        <button onclick="verifyOTP()">Verify OTP</button>
+    </div>
+
+    <!-- Transfer buttons section -->
+    <div class="transfer-buttons">
+        <!-- Initiate Energy Transfer button -->
+        <div class="transfer-container">
+            <h2>Initiate Energy Transfer</h2>
+            <button onclick="initiateEnergyTransfer()">Initiate</button>
+        </div>
+
+        <!-- Complete Energy Transfer button -->
+        <div class="transfer-container">
+            <h2>Complete Energy Transfer</h2>
+            <button onclick="completeEnergyTransfer()">Complete</button>
+        </div>
+    </div>
+
+    <script>
+        async function loginUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Logged in! Use OTP from ' + result.otpSecret);
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function generateOTP() {
+            const response = await fetch('/generate-otp', {
+                method: 'POST',
+            });
+            const result = await response.json();
+            alert('Your OTP is: ' + result.otp);
+        }
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otp').value;
+            const response = await fetch('/verify-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ otp })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.status);
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function initiateEnergyTransfer() {
+            const receiverAddress = prompt('Enter receiver address:');
+            const amount = prompt('Enter the amount of energy:');
+
+            const response = await fetch('/initiate-energy-transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ receiverAddress, amount })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Energy transfer initiated! Your OTP is: ' + result.otp);
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function completeEnergyTransfer() {
+            const transactionId = prompt('Enter transaction ID:');
+            const otp = prompt('Enter OTP:');
+
+            const response = await fetch('/complete-energy-transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ transactionId, otp })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.status);
+            } else {
+                alert(result.error);
+            }
+        }
+    </script>
+</body>
+</html>
